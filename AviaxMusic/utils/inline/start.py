@@ -30,7 +30,7 @@ def private_panel(_):
             InlineKeyboardButton(text=_["S_B_2"], url=config.SUPPORT_GROUP),
         ],
         [
-            InlineKeyboardButton(text=_["ST_B_3"], url=config.SUPPORT_CHANNEL),
+            InlineKeyboardButton(text=_["ST_B_3"], url=langs.string),
             InlineKeyboardButton(text=_["S_B_7"], url=config.UPSTREAM_REPO),
         ],
     ]
