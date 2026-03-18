@@ -2,27 +2,13 @@ import os
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from AviaxMusic import app
-import requests
-
-
-def upload_file(file_path):
-    url = "https://catbox.moe/user/api.php"
-    data = {"reqtype": "fileupload", "json": "true"}
-    files = {"fileToUpload": open(file_path, "rb")}
-    response = requests.post(url, data=data, files=files)
-
-    if response.status_code == 200:
-        return True, response.text.strip()
-    else:
-        return False, f"ᴇʀʀᴏʀ: {response.status_code} - {response.text}"
-
+from telegraph import upload_file
+import time
 
 @app.on_message(filters.command(["tgm", "tgt", "telegraph", "tl"]))
 async def get_link_group(client, message):
     if not message.reply_to_message:
-        return await message.reply_text(
-            "Pʟᴇᴀsᴇ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴍᴇᴅɪᴀ ᴛᴏ ᴜᴘʟᴏᴀᴅ ᴏɴ Tᴇʟᴇɢʀᴀᴘʜ"
-        )
+        return await message.reply_text("Pʟᴇᴀsᴇ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴍᴇᴅɪᴀ ᴛᴏ ᴜᴘʟᴏᴀᴅ ᴏɴ Tᴇʟᴇɢʀᴀᴘʜ")
 
     media = message.reply_to_message
     file_size = 0
@@ -49,26 +35,23 @@ async def get_link_group(client, message):
             local_path = await media.download(progress=progress)
             await text.edit_text("📤 Uᴘʟᴏᴀᴅɪɴɢ ᴛᴏ ᴛᴇʟᴇɢʀᴀᴘʜ...")
 
-            success, upload_path = upload_file(local_path)
+            # Telegraph এ আপলোড
+            response = upload_file(local_path)
+            upload_path = "https://telegra.ph" + response[0]
 
-            if success:
-                await text.edit_text(
-                    f"🌐 | [ᴜᴘʟᴏᴀᴅᴇᴅ ʟɪɴᴋ]({upload_path})",
-                    reply_markup=InlineKeyboardMarkup(
+            await text.edit_text(
+                f"🌐 | [ᴜᴘʟᴏᴀᴅᴇᴅ ʟɪɴᴋ]({upload_path})",
+                reply_markup=InlineKeyboardMarkup(
+                    [
                         [
-                            [
-                                InlineKeyboardButton(
-                                    "ᴜᴘʟᴏᴀᴅᴇᴅ ғɪʟᴇ",
-                                    url=upload_path,
-                                )
-                            ]
+                            InlineKeyboardButton(
+                                "ᴜᴘʟᴏᴀᴅᴇᴅ ғɪʟᴇ",
+                                url=upload_path,
+                            )
                         ]
-                    ),
-                )
-            else:
-                await text.edit_text(
-                    f"ᴀɴ ᴇʀʀᴏʀ ᴏᴄᴄᴜʀʀᴇᴅ ᴡʜɪʟᴇ ᴜᴘʟᴏᴀᴅɪɴɢ ʏᴏᴜʀ ғɪʟᴇ\n{upload_path}"
-                )
+                    ]
+                ),
+            )
 
             try:
                 os.remove(local_path)
@@ -84,23 +67,3 @@ async def get_link_group(client, message):
             return
     except Exception:
         pass
-
-
-__HELP__ = """
-**ᴛᴇʟᴇɢʀᴀᴘʜ ᴜᴘʟᴏᴀᴅ ʙᴏᴛ ᴄᴏᴍᴍᴀɴᴅs**
-
-ᴜsᴇ ᴛʜᴇsᴇ ᴄᴏᴍᴍᴀɴᴅs ᴛᴏ ᴜᴘʟᴏᴀᴅ ᴍᴇᴅɪᴀ ᴛᴏ ᴛᴇʟᴇɢʀᴀᴘʜ:
-
-- `/tgm`: ᴜᴘʟᴏᴀᴅ ʀᴇᴘʟɪᴇᴅ ᴍᴇᴅɪᴀ ᴛᴏ ᴛᴇʟᴇɢʀᴀᴘʜ.
-- `/tgt`: sᴀᴍᴇ ᴀs `/tgm`.
-- `/telegraph`: sᴀᴍᴇ ᴀs `/tgm`.
-- `/tl`: sᴀᴍᴇ ᴀs `/tgm`.
-
-**ᴇxᴀᴍᴘʟᴇ:**
-- ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴘʜᴏᴛᴏ ᴏʀ ᴠɪᴅᴇᴏ ᴡɪᴛʜ `/tgm` ᴛᴏ ᴜᴘʟᴏᴀᴅ ɪᴛ.
-
-**ɴᴏᴛᴇ:**
-ʏᴏᴜ ᴍᴜsᴛ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴍᴇᴅɪᴀ ғɪʟᴇ ғᴏʀ ᴛʜᴇ ᴜᴘʟᴏᴀᴅ ᴛᴏ ᴡᴏʀᴋ.
-"""
-
-__MODULE__ = "Tᴇʟᴇɢʀᴀᴘʜ"
